@@ -47,6 +47,8 @@ jobs:
     name: Create Release
     runs-on: ubuntu-latest
     # needs: build
+    env:
+      TAG: ${GITHUB_REF#"refs/tags/"}
     steps:
       # - name: Download build artifacts
       #   id: download
@@ -54,11 +56,9 @@ jobs:
       #   with:
       #     path: artifacts
       - name: Get tag name
+        id: get-tag
         run: |
-          REF=${{ github.ref }}
-          echo $REF
-          echo ${REF#"refs/tags/"}
-
+          echo ${{ env.TAG }}
 
       # - name: Rename artifacts
       #   run: |
