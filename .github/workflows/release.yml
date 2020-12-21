@@ -12,8 +12,6 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest, windows-latest]
-    env:
-      TAG: ${{ github.event.ref }}
     steps:
       - name: Check out repo
         uses: actions/checkout@v2
@@ -49,6 +47,8 @@ jobs:
     name: Create Release
     runs-on: ubuntu-latest
     needs: build
+    env:
+      TAG: ${{ github.event.ref }}
     steps:
       - name: Download build artifacts
         id: download
