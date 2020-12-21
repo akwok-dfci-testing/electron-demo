@@ -30,6 +30,22 @@ jobs:
         run: yarn install --frozen-lockfile
       - name: Build
         run: yarn electron:build --publish never
+      - name: Get tag
+        id: tag
+        run: |
+          TAG=${GITHUB_REF#"refs/tags/"}
+          echo "::set-output name=tag::${TAG}"
+      - name: Append tag to build filenames
+        run: |
+          TAG=${{ steps.tag.outputs.tag }}
+
+          for file in dist_electron/*.dmg; do
+            mv "$file" "${file%.dmg}_${TAG}.dmg"
+          done
+
+          for file in dist_electron/*.exe; do
+            mv "$file" "${file%.exe}_${TAG}.exe"
+          done
       - name: Upload artifact (mac)
         uses: actions/upload-artifact@v2
         if: ${{ matrix.os  == 'macos-latest' }}
@@ -53,22 +69,6 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           path: artifacts
-      - name: Get tag
-        id: tag
-        run: |
-          TAG=${GITHUB_REF#"refs/tags/"}
-          echo "::set-output name=tag::${TAG}"
-      - name: Rename artifacts
-        run: |
-          TAG=${{ steps.tag.outputs.tag }}
-
-          for file in artifacts/**/*.dmg; do
-            mv "$file" "${file%.dmg}_${TAG}.dmg"
-          done
-
-          for file in artifacts/**/*.exe; do
-            mv "$file" "${file%.exe}_${TAG}.exe"
-          done
       - name: Create release
         id: create_release
         uses: softprops/action-gh-release@v1
