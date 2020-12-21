@@ -6,42 +6,42 @@ on:
       - "v*.*.*"
 
 jobs:
-  # build:
-  #   name: Build
-  #   runs-on: ${{ matrix.os }}
-  #   strategy:
-  #     matrix:
-  #       os: [macos-latest, windows-latest]
-  #   steps:
-  #     - name: Check out repo
-  #       uses: actions/checkout@v2
-  #     - name: Use Node 12
-  #       uses: actions/setup-node@v2
-  #       with:
-  #         node-version: '12'
-  #     - name: Cache node_modules
-  #       id: cache
-  #       uses: actions/cache@v2
-  #       with:
-  #         path: node_modules
-  #         key: node-modules-${{ matrix.os }}-${{ hashFiles('yarn.lock') }}
-  #     - name: Install dependencies
-  #       if: steps.cache.outputs.cache-hit != true
-  #       run: yarn install --frozen-lockfile
-  #     - name: Build
-  #       run: yarn electron:build --publish never
-  #     - name: Upload artifact (mac)
-  #       uses: actions/upload-artifact@v2
-  #       if: ${{ matrix.os  == 'macos-latest' }}
-  #       with:
-  #         name: macos
-  #         path: dist_electron/*.dmg
-  #     - name: Upload artifact (windows)
-  #       uses: actions/upload-artifact@v2
-  #       if: ${{ matrix.os  == 'windows-latest' }}
-  #       with:
-  #         name: windows
-  #         path: dist_electron/*.exe
+  build:
+    name: Build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v2
+      - name: Use Node 12
+        uses: actions/setup-node@v2
+        with:
+          node-version: '12'
+      - name: Cache node_modules
+        id: cache
+        uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: node-modules-${{ matrix.os }}-${{ hashFiles('yarn.lock') }}
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != true
+        run: yarn install --frozen-lockfile
+      - name: Build
+        run: yarn electron:build --publish never
+      - name: Upload artifact (mac)
+        uses: actions/upload-artifact@v2
+        if: ${{ matrix.os  == 'macos-latest' }}
+        with:
+          name: macos
+          path: dist_electron/*.dmg
+      - name: Upload artifact (windows)
+        uses: actions/upload-artifact@v2
+        if: ${{ matrix.os  == 'windows-latest' }}
+        with:
+          name: windows
+          path: dist_electron/*.exe
 
   create-release:
     name: Create Release
@@ -50,31 +50,26 @@ jobs:
     env:
       TAG: ${GITHUB_REF#"refs/tags/"}
     steps:
-      # - name: Download build artifacts
-      #   id: download
-      #   uses: actions/download-artifact@v2
-      #   with:
-      #     path: artifacts
-      - name: Get tag name
-        id: get-tag
+      - name: Download build artifacts
+        id: download
+        uses: actions/download-artifact@v2
+        with:
+          path: artifacts
+      - name: Rename artifacts
         run: |
-          echo ${{ env.TAG }}
+          for file in artifacts/**/*.dmg; do
+            mv "$file" "${file%.dmg}_${TAG}.dmg"
+          done
 
-      # - name: Rename artifacts
-      #   run: |
-      #     for file in artifacts/**/*.dmg; do
-      #       mv "$file" "${file%.dmg}_${TAG}.dmg"
-      #     done
-
-      #     for file in artifacts/**/*.exe; do
-      #       mv "$file" "${file%.exe}_${TAG}.exe"
-      #     done
-      # - name: Create release
-      #   id: create_release
-      #   uses: softprops/action-gh-release@v1
-      #   with:
-      #     files: |
-      #       artifacts/**/*.dmg
-      #       artifacts/**/*.exe
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          for file in artifacts/**/*.exe; do
+            mv "$file" "${file%.exe}_${TAG}.exe"
+          done
+      - name: Create release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            artifacts/**/*.dmg
+            artifacts/**/*.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
