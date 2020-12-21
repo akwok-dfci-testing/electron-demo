@@ -46,7 +46,7 @@ jobs:
   create-release:
     name: Create Release
     runs-on: ubuntu-latest
-    # needs: build
+    needs: build
     env:
       TAG: ${GITHUB_REF#"refs/tags/"}
     steps:
