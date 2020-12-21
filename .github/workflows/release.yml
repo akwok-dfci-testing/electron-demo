@@ -1,7 +1,7 @@
 name: Release
 
 on:
-  push:
+  create:
     tags:
       - "v*.*.*"
 
@@ -37,7 +37,7 @@ jobs:
         if: ${{ matrix.os  == 'macos-latest' }}
         with:
           name: ${{ env.ARTIFACT_NAME }}.dmg
-          path: dist_electron/electron-test.dmg
+          path: dist_electron/electron-demo.dmg
       - name: Upload artifact (windows)
         uses: actions/upload-artifact@v2
         if: ${{ matrix.os  == 'windows-latest' }}
