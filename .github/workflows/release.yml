@@ -55,9 +55,9 @@ jobs:
       #     path: artifacts
       - name: Get tag name
         run: |
-          echo ${{ github.ref }}
-          echo ${{ github.event }}
-          echo ${{ github.event.ref }}
+          REF=${{ github.ref }}
+          echo $REF
+          echo ${REF#"refs/tags/"}
 
 
       # - name: Rename artifacts
