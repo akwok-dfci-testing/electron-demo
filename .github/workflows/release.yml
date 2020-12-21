@@ -12,6 +12,8 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest, windows-latest]
+    env:
+      ARTIFACT_NAME: electron-demo-${{ github.event.ref }}
     steps:
       - name: Check out repo
         uses: actions/checkout@v2
@@ -34,14 +36,14 @@ jobs:
         uses: actions/upload-artifact@v2
         if: ${{ matrix.os  == 'macos-latest' }}
         with:
-          name: macos
-          path: dist_electron/*.dmg
+          name: ${{ env.ARTIFACT_NAME }}.dmg
+          path: dist_electron/electron-test.dmg
       - name: Upload artifact (windows)
         uses: actions/upload-artifact@v2
         if: ${{ matrix.os  == 'windows-latest' }}
         with:
-          name: windows
-          path: dist_electron/*.exe
+          name: ${{ env.ARTIFACT_NAME }}.exe
+          path: dist_electron/electron-demo.exe
 
   create-release:
     name: Create Release
@@ -58,7 +60,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            artifacts/**/*.dmg
-            artifacts/**/*.exe
+            artifacts/*.dmg
+            artifacts/*.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
