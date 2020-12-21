@@ -61,6 +61,7 @@ jobs:
       - name: Rename artifacts
         run: |
           TAG=${{ steps.tag.outputs.tag }}
+
           for file in artifacts/**/*.dmg; do
             mv "$file" "${file%.dmg}_${TAG}.dmg"
           done
